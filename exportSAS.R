@@ -3,6 +3,13 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
   oldPath <- getwd()
   setwd(folder)
   
+  # manage end-of-line character
+  if (is.null(endofline)) {
+    if (.Platform$OS.type == "windows") endofline <- "CRLF" else
+      if (.Platform$OS.type == "unix") endofline <- "LF"
+  } else if (!endofline %in% c("CRLF","LF","CR"))
+    stop("End-of-line parameter mispecified. Must be equal to CRLF, CR or LF.")
+  
   write.table(x, file = nameFile, quote = FALSE, sep = separator, row.names = FALSE, 
               fileEncoding = encoding, na = "")
   
@@ -15,7 +22,8 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
   code <- addCode("LIBNAME out \"", folder, "\" ; \n ")
   code <- addCode("\n ")
   code <- addCode("DATA out.", nameTab, " ; \n ")
-  code <- addCode("INFILE \"", folder, "/", nameFile, "\" DSD DLM = \"", separator, "\" ; \n ")
+  code <- addCode("INFILE \"", folder, "/", nameFile, "\" DSD DLM = \"", separator, 
+                  "\" TERMSTR = ", endofline," ; \n ")
   code <- addCode("INPUT \n ")
   code <- addCode(inputList, " \n ; \n ")
   code <- addCode("RUN ; \n ")
