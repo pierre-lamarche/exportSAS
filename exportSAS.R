@@ -15,6 +15,8 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
   
   # input list
   inputType <- sapply(x, class)
+  if (!is.vector(inputType))
+    inputType <- inputType[nrow(inputType),]
   inputT <- ifelse(inputType == "character", " $", "")
   inputList <- paste0(paste0(names(x), inputT), collapse = " \n ")
   
