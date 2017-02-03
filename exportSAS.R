@@ -20,18 +20,21 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
   # dealing with factor
   if (length(which(inputType == "factor")) > 0) {
     codeFmt <- " \n"
+    codeFmt2 <- "FORMAT \n"
     listVarFac <- names(x)[inputType == "factor"]
+    addCode <- function(...) paste0(codeFmt, ...)
+    addCode2 <- function(...) paste0(codeFmt2, ...)
     for (v in 1:length(listVarFac)) {
       var <- listVarFac[v]
       lvls <-levels(x[, var])
       if (labelVal == TRUE) {
-        addCode <- function(...) paste0(codeFmt, ...)
         codeFmt <- addCode("PROC FORMAT ; \n")
-        codeFmt <- addCode("VALUE ", var, " \n")
+        codeFmt <- addCode("VALUE FMT", v, " \n")
         for (i in 1:length(lvls)) {
           codeFmt <- addCode("  ", i, " = \"", lvls[i], "\" \n")
         }
         codeFmt <- addCode("; \n RUN ; \n \n")
+        codeFmt2 <- addCode2("  ", var, " FMT", v, ". \n")
       }
       x[, var] <- as.numeric(x[, var])
     }  
@@ -45,6 +48,18 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
                        collapse = "\n ")
   
   # dealing with variable labels
+  if (labelVar == TRUE) {
+    require(Hmisc)
+    codeLbl <- "LABEL \n"
+    addCode <- function(...) paste0(codeLbl, ...)
+    listVar <- names(x)
+    for (v in 1:length(listVar)) {
+      var <- listVar[v]
+      if (!label(x[,var]) %in% c(""," "))
+        codeLbl <- addCode(var, " = \"", label(x[, var]), "\" \n")
+    }
+    codeLbl <- addCode(" ; \n")
+  }
   
   # writing SAS script
   addCode <- function(...) paste0(code, ...)
@@ -57,8 +72,12 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
   code <- addCode("INFILE \"", folder, "/", nameFile, "\" DSD DLM = \"", separator, 
                   "\" TERMSTR = ", endofline," ; \n ")
   code <- addCode("LENGTH \n ", lengthList, "\n ; \n ")
+  if (labelVal == TRUE)
+    code <- addCode(codeFmt2, "; \n")
   code <- addCode("INPUT \n ")
   code <- addCode(inputList, " \n ; \n ")
+  if (labelVar == TRUE)
+    code <- addCode(codeLbl)
   code <- addCode("RUN ; \n ")
   
   write.table(x, file = nameFile, quote = FALSE, sep = separator, row.names = FALSE, 
