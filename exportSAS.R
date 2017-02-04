@@ -1,3 +1,59 @@
+#' Export R data.frame objects into SAS datasets
+#'
+#' This R function just aims at constituting an alternative 
+#' to the function `write.foreign` from the package `foreign`.
+#' The existing `write.foreign` misses several features that may 
+#' be useful when translating R data into SAS:
+#' 
+#'   * Labels for the variables (since it is now very well handled 
+#'   in R with the `tibble` object, especially when using RStudio); 
+#'   the labelling process relies on the function `label` from the 
+#'   library `Hmisc`.
+#'   * Possibility to switch on/off the `PROC FORMAT` applied to factors. 
+#'   When the labelling of the values is switched off, the choice has 
+#'   been made to write the numerical value of the levels (instead of 
+#'   the character string of the label, which would be more demanding 
+#'   in terms of memory).
+#'   * Management of possible different end-of-line characters, in 
+#'   particular when R and SAS are working on different OSs.
+#'   * An issue with missing values in character variables existing in 
+#'   `write.foreign` has been solved in this function.
+#'   
+#' Additionally, this function is meant to work along with SAS: the 
+#' script generates txt files and SAS scripts that must then be run 
+#' on a SAS session in order to import the data into SAS (just as 
+#' `write.foreign` already does). There is also the library `haven` 
+#' that enables to directly exports R dataframes into SAS tables; 
+#' however, it seems that depending on the version of SAS that is 
+#' used, the tables turn sometimes not to be readable.
+#' 
+#' # Usage
+#' exportSAS(x, nameTab, nameFile, nameScript, folder, ...)
+#'
+#' @param x A data.frame object to be exported into a SAS dataset.
+#' @param nameTab The name of the SAS dataset.
+#' @param nameFile The name of the ASCII file that will serve the
+#' importation.
+#' @param nameScript The name of the SAS script that will be run 
+#' in a SAS session to import the data.
+#' @param folder The path of the folder where the dataset has to 
+#' be stored.
+#' @param separator The column separator in the ASCII file (default
+#' is `,`).
+#' @param labelVar logical; if TRUE (the default), retrieve the labels
+#' in the data.frame and add them in the DATA STEP.
+#' @param labelVal logical; if TRUE, retrieve the value labels for each
+#' factor variable. Default is FALSE.
+#' @param endofline a character value, "CRLF", "LF" or "CR". It sets the
+#' end-of-line character to be used when SAS will read the ASCII file.
+#' By default, it takes the one naturally used in the OS.
+#' @param encoding a character value, indicating which encoding has to be
+#' used to read the ASCII file.
+#'
+#' @return
+#' @export
+#'
+#' @examples
 exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separator = ",", 
                       labelVar = TRUE, labelVal = FALSE, endofline = NULL, encoding = "") {
   oldPath <- getwd()
@@ -86,4 +142,7 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
   # writing raw data
   write.table(code, file = nameScript, quote = FALSE, sep = "", row.names = FALSE, 
               col.names = FALSE, fileEncoding = encoding)
+  
+  # set the former working directory
+  setwd(oldPath)
 }
