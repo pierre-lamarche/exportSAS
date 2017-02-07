@@ -137,7 +137,7 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
   code <- addCode("RUN ; \n ")
   
   write.table(x, file = nameFile, quote = FALSE, sep = separator, row.names = FALSE, 
-              fileEncoding = encoding, na = "")
+              col.names = FALSE, fileEncoding = encoding, na = "")
   
   # writing raw data
   write.table(code, file = nameScript, quote = FALSE, sep = "", row.names = FALSE, 
