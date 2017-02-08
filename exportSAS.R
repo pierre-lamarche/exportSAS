@@ -140,8 +140,11 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
               col.names = FALSE, fileEncoding = encoding, na = "")
   
   # writing raw data
+  oldScipen <- getOption("scipen")
+  options(scipen = 500)
   write.table(code, file = nameScript, quote = FALSE, sep = "", row.names = FALSE, 
               col.names = FALSE, fileEncoding = encoding)
+  options(scipen = oldScipen)
   
   # set the former working directory
   setwd(oldPath)
