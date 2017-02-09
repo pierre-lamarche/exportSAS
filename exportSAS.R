@@ -103,6 +103,10 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
   lengthList <- paste0(paste0(varChar, inputT[inputType == "character"], length, "."), 
                        collapse = "\n ")
   
+  # dealing with the max. length of records
+  tab <- apply(x, 1, paste, collapse = separator)
+  maxRec <- max(nchar(tab))
+  
   # dealing with variable labels
   if (labelVar == TRUE) {
     require(Hmisc)
@@ -126,7 +130,7 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
     code <- addCode(codeFmt)
   code <- addCode("DATA out.", nameTab, " ; \n ")
   code <- addCode("INFILE \"", folder, "/", nameFile, "\" DSD DLM = \"", separator, 
-                  "\" TERMSTR = ", endofline," ; \n ")
+                  "\" TERMSTR = ", endofline, " LRECL = ",maxRec," ; \n ")
   code <- addCode("LENGTH \n ", lengthList, "\n ; \n ")
   if (labelVal == TRUE)
     code <- addCode(codeFmt2, "; \n")
@@ -140,12 +144,9 @@ exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separa
               col.names = FALSE, fileEncoding = encoding, na = "")
   
   # writing raw data
-  oldScipen <- getOption("scipen")
-  options(scipen = 500)
   write.table(code, file = nameScript, quote = FALSE, sep = "", row.names = FALSE, 
               col.names = FALSE, fileEncoding = encoding)
-  options(scipen = oldScipen)
-  
+
   # set the former working directory
   setwd(oldPath)
 }
