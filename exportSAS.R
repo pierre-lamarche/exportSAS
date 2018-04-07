@@ -31,13 +31,14 @@
 #' exportSAS(x, nameTab, nameFile, nameScript, folder, ...)
 #'
 #' @param x A data.frame object to be exported into a SAS dataset.
-#' @param nameTab The name of the SAS dataset.
+#' @param nameTab The name of the SAS table to be created when importing
+#' the data in SAS (default is <name of x>).
 #' @param nameFile The name of the ASCII file that will serve the
-#' importation.
+#' importation (default is <name of x>.txt).
 #' @param nameScript The name of the SAS script that will be run 
-#' in a SAS session to import the data.
+#' in a SAS session to import the data (default is <name of x>.sas).
 #' @param folder The path of the folder where the dataset has to 
-#' be stored.
+#' be stored (default is the working directory).
 #' @param separator The column separator in the ASCII file (default
 #' is `,`).
 #' @param labelVar logical; if TRUE (the default), retrieve the labels
@@ -54,10 +55,21 @@
 #' @export
 #'
 #' @examples
-exportSAS <- function(x, nameTab, nameFile, nameScript, folder = getwd(), separator = ",", 
+exportSAS <- function(x, nameTab = NULL, nameFile = NULL, nameScript = NULL, folder = getwd(), separator = ",", 
                       labelVar = TRUE, labelVal = FALSE, endofline = NULL, encoding = "") {
   oldPath <- getwd()
   setwd(folder)
+  
+  #assign default values to nameTab, nameFile and nameScript
+  if (is.null(nameTab)) {
+    nameTab <- deparse(substitute(x))
+  }
+  if (is.null(nameFile)) {
+    nameFile <- paste0(deparse(substitute(x)), ".txt")
+  }
+  if (is.null(nameScript)) {
+    nameScript <- paste0(deparse(substitute(x)), ".sas")
+  }
   
   # manage end-of-line character
   if (is.null(endofline)) {
