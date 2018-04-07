@@ -90,7 +90,7 @@ exportSAS <- function(x, nameTab = NULL, nameFile = NULL, nameScript = NULL, fol
   if (length(which(inputType == "factor")) > 0) {
     if (is.null(labelVal)) {
       aLabelVal <- readline("Import value labels as well? (Y/N)")
-      while (toupper(aLabelVal) %in% c("Y","N","YES","NO")) {
+      while (!toupper(aLabelVal) %in% c("Y","N","YES","NO")) {
         cat("ERROR: answer shoud be Y/N. \n")
         aLabelVal <- readline("Import value labels as well? (Y/N)")
       }
