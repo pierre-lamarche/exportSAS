@@ -44,7 +44,8 @@
 #' @param labelVar logical; if TRUE (the default), retrieve the labels
 #' in the data.frame and add them in the DATA STEP.
 #' @param labelVal logical; if TRUE, retrieve the value labels for each
-#' factor variable. Default is FALSE.
+#' factor variable. Default is NULL; in case factors are found in the table
+#' the user is asked whether to import value labels or not.
 #' @param endofline a character value, "CRLF", "LF" or "CR". It sets the
 #' end-of-line character to be used when SAS will read the ASCII file.
 #' By default, it takes the one naturally used in the OS.
@@ -56,7 +57,7 @@
 #'
 #' @examples
 exportSAS <- function(x, nameTab = NULL, nameFile = NULL, nameScript = NULL, folder = getwd(), separator = ",", 
-                      labelVar = TRUE, labelVal = FALSE, endofline = NULL, encoding = "") {
+                      labelVar = TRUE, labelVal = NULL, endofline = NULL, encoding = "") {
   oldPath <- getwd()
   setwd(folder)
   
@@ -87,6 +88,14 @@ exportSAS <- function(x, nameTab = NULL, nameFile = NULL, nameScript = NULL, fol
   
   # dealing with factor
   if (length(which(inputType == "factor")) > 0) {
+    if (is.null(labelVal)) {
+      aLabelVal <- readline("Import value labels as well? (Y/N)")
+      while (toupper(aLabelVal) %in% c("Y","N","YES","NO")) {
+        cat("ERROR: answer shoud be Y/N. \n")
+        aLabelVal <- readline("Import value labels as well? (Y/N)")
+      }
+      labelVal <- ifelse(toupper(aLabelVal) %in% c("Y","YES"), TRUE, FALSE)
+    }
     codeFmt <- " \n"
     codeFmt2 <- "FORMAT \n"
     listVarFac <- names(x)[inputType == "factor"]
